@@ -10,10 +10,25 @@ except FileNotFoundError:
 
 try:
     os.mkdir(fr"{root_direct}\video")
+except FileExistsError:
+    pass
+try:
     os.mkdir(fr"{root_direct}\audio")
+except FileExistsError:
+    pass
+try:
     os.mkdir(fr"{root_direct}\archives")
+except FileExistsError:
+    pass
+try:
     os.mkdir(fr"{root_direct}\images")
+except FileExistsError:
+    pass
+try:
     os.mkdir(fr"{root_direct}\documents")
+except FileExistsError:
+    pass
+try:
     os.mkdir(fr"{root_direct}\others")
 except FileExistsError:
     pass
