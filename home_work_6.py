@@ -33,14 +33,15 @@ try:
 except FileExistsError:
     pass
 
-
-docs = (".doc", ".docx", ".txt", ".pdf", ".xlxs", ".xlx", ".pptx", ".ppt")
+docs = (".doc", ".docx", ".txt", ".pdf", ".xlxs", ".xlx", ".pptx", ".ppt", ".csv")
 images = (".jpeg", ".png", ".jpg", ".svg")
 video = (".avi", ".mp4", ".mov", ".mkv")
 audio = (".mp3", ".ogg", ".wav", ".amr")
-archives = (".zip", ".rar", ".gz", ".tar")
+archives = (".zip", ".rar", ".gz", ".tar", "tar.gz")
 
 path_trash = list()
+
+
 
 filter_dir = (fr"{root_direct}", fr"{root_direct}\video", fr"{root_direct}\audio", fr"{root_direct}\archives",
               fr"{root_direct}\images", fr"{root_direct}\documents", fr"{root_direct}\others")
@@ -56,6 +57,7 @@ translation = {'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e',
 
 punct_symbols = "!#$%&'\"()*+,№-/:;<=>?@[\]^_`{|}~"
 
+
 def normalize(text):
     for c in punct_symbols:
         if c in text:
@@ -68,44 +70,57 @@ def normalize(text):
 
 for path, direct, files in os.walk(root_direct):
     path_trash.append(path)
+
     for file in files:
 
         if file.endswith(docs):
-
             try:
-                shutil.move(path + "\\" + file, fr"{root_direct}\documents\{normalize(file)}")
-                # Запитати як обійтися без try - except
+                shutil.move(os.path.join(f"{path}", f"{file}"), os.path.join(f"{root_direct}",
+                                                                             "documents", f"{normalize(file)}"))
+
 
             except shutil.Error:
                 pass
 
         elif file.endswith(images):
             try:
-                shutil.move(path + "\\" + file, fr"{root_direct}\images\{normalize(file)}")
+                shutil.move(os.path.join(f"{path}", f"{file}"), os.path.join(f"{root_direct}", "images",
+                                                                             f"{normalize(file)}"))
             except shutil.Error:
                 pass
 
         elif file.endswith(video):
             try:
-                shutil.move(path + "\\" + file, fr"{root_direct}\video\{normalize(file)}")
+                shutil.move(os.path.join(f"{path}", f"{file}"), os.path.join(f"{root_direct}", "video",
+                                                                             f"{normalize(file)}"))
             except shutil.Error:
                 pass
 
         elif file.endswith(audio):
             try:
-                shutil.move(path + "\\" + file, fr"{root_direct}\audio\{normalize(file)}")
+                shutil.move(os.path.join(f"{path}", f"{file}"), os.path.join(f"{root_direct}", "audio",
+                                                                             f"{normalize(file)}"))
             except shutil.Error:
                 pass
 
-        elif file.endswith(archives):  # Додати розапаковування архіву...
-            try:
-                shutil.move(path + "\\" + file, fr"{root_direct}\archives\{normalize(file)}")
-            except shutil.Error:
-                pass
-
+        elif file.endswith(archives):
+            old_file = os.path.join(path, file)
+            new_file = os.path.join(path, normalize(file))
+            os.rename(old_file, new_file)
+            archive_dir = os.path.basename(new_file).split('.')[0]
+            archive_rormat = new_file.split('.')[-1]
+            archive_files = list()
+            archive_files.append(new_file)
+            print(archive_files)
+            for new_file in archive_files:
+                try:
+                    shutil.unpack_archive(new_file, fr"{root_direct}\archives\{archive_dir}", format=archive_rormat)
+                except ValueError:
+                    shutil.move(new_file, fr"{root_direct}\archives")
+                    continue
         else:
             try:
-                shutil.move(path + "\\" + file, fr"{root_direct}\others")
+                shutil.move(os.path.join(f"{path}", f"{file}"), os.path.join(f"{root_direct}", "others"))
             except shutil.Error:
                 pass
 
@@ -113,5 +128,3 @@ for path, direct, files in os.walk(root_direct):
     dir_del = list(set(path_trash) - set(filter_dir))
     for dir_path in dir_del:
         shutil.rmtree(dir_path, ignore_errors=True)
-
-
